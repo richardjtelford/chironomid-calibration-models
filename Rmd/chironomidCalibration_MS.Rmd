@@ -25,31 +25,9 @@ csl: ../journal-of-paleolimnology.csl
 ---
 
 
-
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, echo = FALSE, include  = TRUE, warning = FALSE, message = FALSE, cache = FALSE)
+knitr::opts_chunk$set(echo = FALSE, include  = TRUE, warning = FALSE, message = FALSE)
 
-library("tidyverse")
-library("readr")
-library("gridExtra")
-library("broom")
-```
-```{r load}
-set.seed(42)
-
-chiron <- read_csv("data/chironomidCalibration.csv")
-chiron <- chiron %>% 
-  select(-`Altitudinal gradient (m)`) %>% 
-  mutate(year = as.numeric(gsub(".*(\\d{4}).*", "\\1", Study))) %>%
-  mutate(minT = as.numeric(gsub("^(.*)–.*$", "\\1", `Tgradient (°C)`))) %>%
-  mutate(maxT = as.numeric(gsub("^.*–(.*)$", "\\1", `Tgradient (°C)`))) %>%
-  mutate(midT = (minT + maxT)/2) %>%
-  mutate(Notes = ifelse(is.na(Notes), "", Notes)) %>%
-  mutate(AirWater = factor(AirWater, levels = c("air", "air/time", "water")))
-
-format_p <- function(p) {
-  ifelse(p < 0.001, "< 0.001", paste("=", signif(p, 2)))
-}
 ```
 
 # Abstract{-}
@@ -320,6 +298,6 @@ table1 %>%
 
 ## Acknowledgements{-}
 
-This work was partially funded by the Norwegian Research Council FriMedBio project palaeoDrivers (213607). Code to replicate all the analyses shown above is archived at [https://github.com/richardjtelford/Zabinskie](https://github.com/richardjtelford/Zabinskie).
+This work was partially funded by the Norwegian Research Council FriMedBio project palaeoDrivers (213607). Code to reproduce this manuscript is archived at [https://github.com/richardjtelford/chironomid-calibration-models](https://github.com/richardjtelford/chironomid-calibration-models).
 
 ## References{-}
