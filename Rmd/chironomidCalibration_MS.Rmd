@@ -20,14 +20,15 @@ output:
       number_sections: true
 documentclass: article
 classoption: a4paper
-bibliography: ../chironomid.bib
-csl: ../journal-of-paleolimnology.csl
+bibliography: extra/chironomid.bib
+csl: extra/journal-of-paleolimnology.csl
 ---
 
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, include  = TRUE, warning = FALSE, message = FALSE)
-
+loadd(chiron_clean)
+loadd(chiron_air)
 ```
 
 # Abstract{-}
@@ -48,7 +49,7 @@ number of sites
 
 Chironomid (non-biting midges) are sensitive to temperature [@Eggermont2011], and because their head-capsules preserve well in lake sediments, their fossil assemblages can be use to reconstruct past temperature with a transfer function trained on the chironomid-temperature relationship in a modern calibration set of chironomid assemblages and associated temperatures. They are a often used to provide a independent temperature reconstruction against which pollen or macrofossil-inferred vegetation changes can be compared [e.g., @Samartin2012].
 
-The performance of transfer functions for reconstructing past temperatures from chironomid assemblages in lake sediments varies enormously. The root-mean-squared-error of prediction (RMSEP) for transfer functions in a compilation by Eggermont and Heiri [-@Eggermont2011], augmented by a few recent studies (Table 1)[^1], ranges between `r min(chiron$'RMSEP (°C)')` and `r round(max(chiron$'RMSEP (°C)'), 2)` °C. The lowest RMSEP suggests that chironomids give very precise reconstructions; the highest suggests that chironomids have limited utility for anything other than reconstruction glacial-interglacial changes. What causes this `r round(max(chiron$'RMSEP (°C)')/min(chiron$'RMSEP (°C)'), 1)`-fold difference in RMSEP? Understanding this might suggest where efforts to improve chironomid-temperature, and other, transfer functions should be focused.
+The performance of transfer functions for reconstructing past temperatures from chironomid assemblages in lake sediments varies enormously. The root-mean-squared-error of prediction (RMSEP) for transfer functions in a compilation by Eggermont and Heiri [-@Eggermont2011], augmented by a few recent studies (Table 1)[^1], ranges between `r min(chiron_clean$'RMSEP (°C)')` and `r round(max(chiron_clean$'RMSEP (°C)'), 2)` °C. The lowest RMSEP suggests that chironomids give very precise reconstructions; the highest suggests that chironomids have limited utility for anything other than reconstruction glacial-interglacial changes. What causes this `r round(max(chiron_clean$'RMSEP (°C)')/min(chiron_clean$'RMSEP (°C)'), 1)`-fold difference in RMSEP? Understanding this might suggest where efforts to improve chironomid-temperature, and other, transfer functions should be focused.
 
 # Methods
 
@@ -65,18 +66,13 @@ Code to replicate all the analyses shown above is archived at [https://github.co
 Part of the variance in performance is explained by the choice of air or water temperatures as a calibration target [@Eggermont2011, Figure 1]. Models calibrated against water temperature have a worse performance even though chironomids spend most of their life in water. This is probably because water temperatures are spot measurements, and thus reflect recent weather, whereas air temperatures are climatological means derived from local weather stations or gridded climatologies [e.g., @Hijmans2005]. 
 
 ```{r calibrationTarget, fig.cap = "Figure 1. Effect of calibration target on RMSEP"}
-ggplot(chiron, aes(x = AirWater, y = `RMSEP (°C)`, colour = AirWater)) + 
-  geom_boxplot() + 
-  geom_jitter(height = 0, width = 0.4) +
-  xlab("Calibration target")
-```
-```{r airOnly}
-chiron <- filter(chiron, AirWater != "water")
+readd(plot_calibrationTarget)
+#print(plot_calibrationTarget)
 ```
 
-The following analyses concern only the `r nrow(chiron)` transfer functions calibrated against air temperatures. Most of these transfer functions are trained on calibration sets of many lakes (calibration-in-space). Two transfer function [@Larocque-Tobler2011; @Luoto2016] are trained on fluctuations in chironomid assemblages in one lake over many years (calibration-in-time). Varve chronologies were used to determine the age of each assemblage. Temperature data for each year are available from nearby weather stations. Both calibration-in-time transfer functions have low RMSEPs.    
+The following analyses concern only the `r nrow(chiron_air)` transfer functions calibrated against air temperatures. Most of these transfer functions are trained on calibration sets of many lakes (calibration-in-space). Two transfer function [@Larocque-Tobler2011; @Luoto2016] are trained on fluctuations in chironomid assemblages in one lake over many years (calibration-in-time). Varve chronologies were used to determine the age of each assemblage. Temperature data for each year are available from nearby weather stations. Both calibration-in-time transfer functions have low RMSEPs.    
 
-The range of RMSEPs for the air-temperature calibration-in-space models only slightly smaller than for the full set of models.  The coefficient of determination (r^2^) varies between `r min(chiron$r2jack)` and `r round(max(chiron$r2jack), 2)` and is uncorrelated with RMSEP (Pearson r = `r round(cor(chiron$'RMSEP (°C)', chiron$r2jack), 2)`, p `r format_p(cor.test(chiron$'RMSEP (°C)', chiron$r2jack)$p.value)`).
+The range of RMSEPs for the air-temperature calibration-in-space models only slightly smaller than for the full set of models.  The coefficient of determination (r^2^) varies between `r min(chiron_air$r2jack)` and `r round(max(chiron_air$r2jack), 2)` and is uncorrelated with RMSEP (Pearson r = `r round(cor(chiron_air$'RMSEP (°C)', chiron_air$r2jack), 2)`, p `r format_p(cor.test(chiron_air$'RMSEP (°C)', chiron_air$r2jack)$p.value)`).
 
 I have several hypotheses that might explain the difference in performance between models:
 
@@ -94,10 +90,10 @@ Only some of these can be answered with the data currently to hand.
 ## Gradient length
 
 ```{r}
-mod <- lm(`RMSEP (°C)` ~ `Range of gradient (°C)`, data = chiron, subset = AirWater == "air")
+mod <- lm(`RMSEP (°C)` ~ `Range of gradient (°C)`, data = chiron_air)
 gmod <- glance(mod)
 
-rmod <- lm(r2jack ~ `Range of gradient (°C)`, data = chiron, subset = AirWater == "air")
+rmod <- lm(r2jack ~ `Range of gradient (°C)`, data = chiron_air)
 grmod <- glance(rmod)
 
 mod2 <- update(mod, . ~ . + I(`Range of gradient (°C)`^2))
@@ -105,12 +101,12 @@ mod2 <- update(mod, . ~ . + I(`Range of gradient (°C)`^2))
 
 ```
 
-The temperatures in the calibration sets range from `r min(chiron$'Range of gradient (°C)')` to `r max(chiron$'Range of gradient (°C)')` °C. RMSEP has a strong (R^2^ = `r round(gmod$r.squared, 2)` ; p `r format_p(gmod$p.value)`) positive (slope = `r signif(coef(mod)[2], 2)` °C/°C) relationship with temperature range (Figure 2). The relation between temperature range and r^2^ is weaker (R^2^ = `r round(grmod$r.squared, 2)`; p `r format_p(grmod$p.value)`), and also positive (slope = `r signif(coef(rmod)[2], 2)` °C^-1^).
+The temperatures in the calibration sets range from `r min(chiron_air$'Range of gradient (°C)')` to `r max(chiron_air$'Range of gradient (°C)')` °C. RMSEP has a strong (R^2^ = `r round(gmod$r.squared, 2)` ; p `r format_p(gmod$p.value)`) positive (slope = `r signif(coef(mod)[2], 2)` °C/°C) relationship with temperature range (Figure 2). The relation between temperature range and r^2^ is weaker (R^2^ = `r round(grmod$r.squared, 2)`; p `r format_p(grmod$p.value)`), and also positive (slope = `r signif(coef(rmod)[2], 2)` °C^-1^).
 
 ```{r gradientfig, fig.cap="Figure 2. RMSEP and r^2^ against calibration set temperature range"}
-g1 <- ggplot(chiron, aes(x = `Range of gradient (°C)`, y = `RMSEP (°C)`, colour = AirWater)) + 
+g1 <- ggplot(chiron_air, aes(x = `Range of gradient (°C)`, y = `RMSEP (°C)`, colour = AirWater)) + 
   geom_point(show.legend = FALSE) + 
-  geom_smooth(data = filter(chiron, AirWater == "air"), method = "lm", formula = y ~ x, show.legend = FALSE)
+  geom_smooth(data = filter(chiron_air, AirWater == "air"), method = "lm", formula = y ~ x, show.legend = FALSE)
 
 g2 <- g1 + aes(x = `Range of gradient (°C)`, y = r2jack)
 
@@ -126,20 +122,20 @@ But why does the RMSEP increase with gradient length? There are two possible exp
 
 ```{r lakeDensity, fig.cap="Figure 3. Density of lakes as a function of temperature range."}
 g1 + aes(x = `Range of gradient (°C)`, y = No_lakes/`Range of gradient (°C)`)
-mod_a <-  lm(I(No_lakes/`Range of gradient (°C)`) ~ `Range of gradient (°C)`, data = chiron, subset = No_lakes < 400) 
+mod_a <-  lm(I(No_lakes/`Range of gradient (°C)`) ~ `Range of gradient (°C)`, data = chiron_air, subset = No_lakes < 400) 
 gmod_a <- glance(mod_a)
 ```
 
 Omitting the anomalously large composite calibration set [@Fortin2015], there is a significant (p `r format_p(gmod_a$p.value)`) negative trend (slope = `r signif(coef(mod_a)[2], 2)` lakes/°C/°C).
 
 ```{r lakedensity}
-mod_den <-  lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`), data = chiron, subset = No_lakes < 400) 
+mod_den <-  lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`), data = chiron_air, subset = No_lakes < 400) 
 gmod_den <- glance(mod_den)
 
-mod_no450 <-  lm(`RMSEP (°C)` ~ `Range of gradient (°C)`, data = chiron, subset = No_lakes < 400) 
+mod_no450 <-  lm(`RMSEP (°C)` ~ `Range of gradient (°C)`, data = chiron_air, subset = No_lakes < 400) 
 gmod_no450 <- glance(mod_no450)
 
-mod_den_r <-  lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`) + `Range of gradient (°C)`, data = chiron, subset = No_lakes < 400) 
+mod_den_r <-  lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`) + `Range of gradient (°C)`, data = chiron_air, subset = No_lakes < 400) 
 gmod_den_r <- glance(mod_den_r)
 ```
 
@@ -153,15 +149,15 @@ Simulated species-environment data may help understand the relative importance o
 
 The number of observations in a calibration set has a large impact on transfer-function performance [@Reavie2011]. Reavie and Juggins [-@Reavie2011] took large diatom-phosphorus calibration sets and estimated the performance of stratified-random subsets of observations. They found that there were substantial improvements in performance until calibration sets included 40-70 observations and smaller improvements thereafter. Transfer-function performance will increase because, with more observations, species optima are better estimated and so reconstructions are more accurate.
 
-Translating this calibration set size from diatoms to chironomids is difficult as it will depend on the amount of turnover in the assemblages along the gradient of interest (which could be estimated with detrended constrained correspondence analysis) and the amount of noise inherent in the different proxies. Assuming the numbers can be used as-is, `r round(mean(chiron$No_lakes < 40, na.rm = TRUE) * 100)` % of calibration sets have fewer than 40 lakes, and `r round(mean(chiron$No_lakes < 70, na.rm = TRUE) * 100)` % have fewer than 70. Many of the calibration sets are small enough to expect some size-related performance penalty.
+Translating this calibration set size from diatoms to chironomids is difficult as it will depend on the amount of turnover in the assemblages along the gradient of interest (which could be estimated with detrended constrained correspondence analysis) and the amount of noise inherent in the different proxies. Assuming the numbers can be used as-is, `r round(mean(chiron_air$No_lakes < 40, na.rm = TRUE) * 100)` % of calibration sets have fewer than 40 lakes, and `r round(mean(chiron_air$No_lakes < 70, na.rm = TRUE) * 100)` % have fewer than 70. Many of the calibration sets are small enough to expect some size-related performance penalty.
 
 ```{r NoLakeRMSEP, fig.cap = "Figure 4. RMSEP against the number of lakes in each calibration set, omitting the anomalously large calibration set."}
-g1  %+% filter(chiron, No_lakes < 400) + 
+g1  %+% filter(chiron_air, No_lakes < 400) + 
   aes(x = No_lakes,  y = `RMSEP (°C)`) + 
   geom_vline(xintercept = c(40, 70)) + 
   xlab("Number of lakes")
 
-mod_nlakes <- lm(`RMSEP (°C)` ~ No_lakes, data = chiron, subset = No_lakes < 400)
+mod_nlakes <- lm(`RMSEP (°C)` ~ No_lakes, data = chiron_air, subset = No_lakes < 400)
 mod_nlakes2 <- update(mod_nlakes, . ~ . + `Range of gradient (°C)`)
 ```
 
@@ -181,11 +177,11 @@ The number of taxa could also be used as a proxy for taxonomic resolution, but w
 ```{r taxonResolution, fig.cap="Figure 5. RMSEP against year of publication"}
 g1 + aes(x = year, y = `RMSEP (°C)`)
 
-mod_tx <- update(mod, . ~ . + year, data = chiron)
+mod_tx <- update(mod, . ~ . + year, data = chiron_air)
 #summary(mod_tx)
 ```
 
-After accounting for the temperature range in the calibration set, year is not a significant predictor of calibration set length (p = `r format_p(anova(mod, mod_tx)$Pr[2])`). This is perhaps not surprising given that the `r  round((1.59 - 1.41)/1.59 * 100, 1)` % improvement found by Heiri and Lotter [-@Heiri2010] is small relative to the `r round(max(chiron$'RMSEP (°C)')/min(chiron$'RMSEP (°C)'), 1)`-fold range in RMSEP.
+After accounting for the temperature range in the calibration set, year is not a significant predictor of calibration set length (p = `r format_p(anova(mod, mod_tx)$Pr[2])`). This is perhaps not surprising given that the `r  round((1.59 - 1.41)/1.59 * 100, 1)` % improvement found by Heiri and Lotter [-@Heiri2010] is small relative to the `r round(max(chiron_air$'RMSEP (°C)')/min(chiron_air$'RMSEP (°C)'), 1)`-fold range in RMSEP.
  
 ## Chironomid sensitivity to temperature varies with temperature
 
@@ -193,7 +189,7 @@ It is possible that chironomid sensitivity to temperature is not constant along 
 
 The optimal test for this would probably include detrended constrained correspondence analyses over different parts of the temperature gradient in different calibration sets to see if the length of the first axis (a measure of turnover) changes in a consistent manner. Not having this information to hand, I test if the transfer function RMSEP is a function of the mid-point temperature of the calibration set.
 
-There is a strong relationship between the mid-point temperature and RMSEP, but, because of the hard boundary at 0°C, there is also a strong correlation between mid-point temperature and temperature range (Pearson r = `r round(cor(chiron$'Range of gradient (°C)', chiron$midT), 2)`, p `r format_p(cor.test(chiron$'Range of gradient (°C)', chiron$midT)$p.value)`).
+There is a strong relationship between the mid-point temperature and RMSEP, but, because of the hard boundary at 0°C, there is also a strong correlation between mid-point temperature and temperature range (Pearson r = `r round(cor(chiron_air$'Range of gradient (°C)', chiron_air$midT), 2)`, p `r format_p(cor.test(chiron_air$'Range of gradient (°C)', chiron_air$midT)$p.value)`).
 
 ```{r midpoint, fig.cap="Figure 6. RMSEP against mid-point temperature and mid-point temperature against temperature range"}
 g3 <- g1 + aes(x = midT, y = `RMSEP (°C)`) + xlab("Mid-point temperature (°C)")
@@ -201,7 +197,7 @@ g3 <- g1 + aes(x = midT, y = `RMSEP (°C)`) + xlab("Mid-point temperature (°C)"
 g4 <- g1 + aes(x = `Range of gradient (°C)`, y = midT) + ylab("Mid-point temperature (°C)")
 grid.arrange(g3, g4, ncol = 2)
 
-mod_mp <- update(mod, . ~ . + midT, data = chiron)
+mod_mp <- update(mod, . ~ . + midT, data = chiron_air)
 #summary(mod_mp)
 ```
 
@@ -259,7 +255,7 @@ g1 + aes(x = `RMSEP as % of gradient`, y = r2jack)
 
 \blandscape
 ```{r}
-table1 <- chiron %>% 
+table1 <- chiron_air %>% 
   select(-(year:midT)) %>%
   rename(`No lakes` = No_lakes, 
          `No taxa` = No_taxa, 
@@ -282,15 +278,15 @@ table1 %>%
   select(-AirWater) %>% pander::pander(caption = "Chironomid-based transfer functions for air temperature. Methods include weighted-averaging with inverse deshrinking (WAinv), partial least-squares (PLS), weighted-averaging partial least-squares, weighted modern analogue technique, and Bayesian methods. Numbers in brackets after the model indicate the number of components/analogues used. Listed are the coefficient of determination (r^2^) between the predicted and observed values, the root-mean-squared-error of prediction (RMSEP), RMSEP as % of the gradient, and maximum bias. All statistics are based on leave-one-out cross validation, except where noted otherwise. Most values from Eggermont and Heiri [-@Eggermont2011].", split.cells = 25, split.tables = 190, digits = 2)
 
 
-table1 %>% 
-  filter(AirWater == "water") %>% 
-  select(-AirWater) %>% 
-  pander::pander(caption = "Models calibrated against water temperature", split.cells = 25, split.tables = 180, digits = 2)
-
-table1 %>% 
-  filter(AirWater == "air/time") %>% 
-  select(-AirWater, -`No lakes`) %>% 
-  pander::pander(caption = "Calibration in time models ", split.cells = 25, split.tables = 190, digits = 2)
+# table1 %>% 
+#   filter(AirWater == "water") %>% 
+#   select(-AirWater) %>% 
+#   pander::pander(caption = "Models calibrated against water temperature", split.cells = 25, split.tables = 180, digits = 2)
+# 
+# table1 %>% 
+#   filter(AirWater == "air/time") %>% 
+#   select(-AirWater, -`No lakes`) %>% 
+#   pander::pander(caption = "Calibration in time models ", split.cells = 25, split.tables = 190, digits = 2)
 
 ```
 

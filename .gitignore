@@ -38,6 +38,15 @@ vignettes/*.pdf
 *cache/
 *_files/
 
+#drake cache
+.drake/
+
+#output
+output/
+
+#extra
+Rmd/extra/
+
 #data
 *.bil
 *.hdr

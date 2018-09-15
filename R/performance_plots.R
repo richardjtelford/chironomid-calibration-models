@@ -18,7 +18,7 @@ format_p <- function(p) {
 
 
 calibrationTarget_plot <- function(chiron){
-  ggplot(chiron, aes(x = AirWater, y = `RMSEP (°C)`, colour = AirWater)) +
+  ggplot(chiron, aes(x = AirWater, y = `RMSEP (°C)`, fill = AirWater)) +
     geom_boxplot() +
     geom_jitter(height = 0, width = 0.4) +
     xlab("Calibration target")
