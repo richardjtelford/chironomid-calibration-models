@@ -24,14 +24,6 @@ calibrationTarget_plot <- function(chiron){
     xlab("Calibration target")
 }
   
-  # ```
-  # ```{r airOnly}
-  # chiron <- filter(chiron, AirWater != "water")
-  # ```
-  # 
-  # 
-  # 
-  # 
   # ```{r}
   # mod <- lm(`RMSEP (°C)` ~ `Range of gradient (°C)`, data = chiron, subset = AirWater == "air")
   # gmod <- glance(mod)
@@ -43,19 +35,20 @@ calibrationTarget_plot <- function(chiron){
   # #anova(mod, mod2)
   # 
   # ```
-  # 
-  # 
-  # ```{r gradientfig, fig.cap="Figure 2. RMSEP and r^2^ against calibration set temperature range"}
-  # g1 <- ggplot(chiron, aes(x = `Range of gradient (°C)`, y = `RMSEP (°C)`, colour = AirWater)) + 
-  #   geom_point(show.legend = FALSE) + 
-  #   geom_smooth(data = filter(chiron, AirWater == "air"), method = "lm", formula = y ~ x, show.legend = FALSE)
-  # 
-  # g2 <- g1 + aes(x = `Range of gradient (°C)`, y = r2jack)
-  # 
-  # grid.arrange(g1, g2, ncol = 2)
-  # ```
-  # 
-  # 
+
+base_plot <- function(x){
+  g1 <- ggplot(x, aes(x = `Range of gradient (°C)`, y = `RMSEP (°C)`, colour = AirWater)) +
+  geom_point(show.legend = FALSE) +
+  geom_smooth(data = filter(x, AirWater == "air"), method = "lm", formula = y ~ x, show.legend = FALSE)
+}
+
+
+performance_vs_range_plot <- function(base_plot){
+  g2 <- base_plot + aes(x = `Range of gradient (°C)`, y = r2jack)
+
+  grid.arrange(base_plot, g2, ncol = 2)
+}
+
   # ```{r lakeDensity, fig.cap="Figure 3. Density of lakes as a function of temperature range."}
   # g1 + aes(x = `Range of gradient (°C)`, y = No_lakes/`Range of gradient (°C)`)
   # mod_a <-  lm(I(No_lakes/`Range of gradient (°C)`) ~ `Range of gradient (°C)`, data = chiron, subset = No_lakes < 400) 

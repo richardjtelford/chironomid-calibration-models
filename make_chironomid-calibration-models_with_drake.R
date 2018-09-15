@@ -19,6 +19,9 @@ analyses <- drake_plan(
   
   #make plots
   plot_calibrationTarget = calibrationTarget_plot(chiron_clean),
+  plot_base = base_plot(chiron_air),
+  plot_performance_vs_range = performance_vs_range_plot(plot_base),
+  
   
   #get bibliography
   biblio = download.file("https://raw.githubusercontent.com/richardjtelford/Zabinskie/master/chironomid.bib", destfile = file_out("Rmd/extra/chironomid.bib")),
