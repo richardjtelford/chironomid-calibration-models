@@ -24,7 +24,7 @@ analyses <- drake_plan(
   biblio = download.file("https://raw.githubusercontent.com/richardjtelford/Zabinskie/master/chironomid.bib", destfile = file_out("Rmd/extra/chironomid.bib")),
   
   #knit manuscript
-  manuscript = rmarkdown::render(input = knitr_in("Rmd/chironomidCalibration_MS.Rmd"), output_dir = "../", output_file = file_out("output/chironomidCalibration_MS.pdf")),
+  manuscript = rmarkdown::render(input = knitr_in("Rmd/chironomidCalibration_MS.Rmd"), output_dir = "./output", output_file = file_out("output/chironomidCalibration_MS.pdf")),
   
   strings_in_dots = "literals"
 )
