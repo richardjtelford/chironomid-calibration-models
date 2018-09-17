@@ -11,9 +11,6 @@ header-includes:
    - \usepackage{pdflscape}
    - \newcommand{\blandscape}{\begin{landscape}}
    - \newcommand{\elandscape}{\end{landscape}}   
-#output:
-#  word_document: default
-#  html_document: default
 output:
   pdf_document:
       latex_engine: xelatex
@@ -41,37 +38,34 @@ Transfer functions for reconstructing palaeoenvironmental variables from microfo
 
 # Introduction
 
-Many transfer functions for reconstucting palaeoenvironmental variables from microfossil assemblages have been developed [#cite review papers]. The performance of these transfer functions, estimated by some form of cross-validation, can vary substantially between models developed for the same environmental variable and microfossil group. 
+Transfer functions for reconstucting palaeoenvironmental conditions from the relationship between microfossil assemblages and environmental variables in a calibration set are an important tool for palaeological research [@Birks2010]. Transfer functions, like all numerical methods, have uncertainties, which palaeoecologists seek to minimise. Several causes of poor performance have been identified, including low count sums [@Heiri2001] (#check), few calibration set sites [@Reavie2011], and low taxonomic resolution [@Heiri2010], but no comprehensive analysis of the relative importance of these factors has been undertaken, potentially leading to mis-directed efforts.
 
-suggested causes of performance difference
-count sums
-number of sites
+Chironomid (non-biting midges) are sensitive to temperature [@Eggermont2011], and because their head-capsules preserve well in lake sediments, their fossil assemblages can be use to reconstruct past temperature with transfer functions. The performance of such transfer functions varies substantially: the lowest root mean squared error of prediction (RMSEP) reported by Eggermont and Heiri [-@Eggermont2011] suggests that chironomids give very precise reconstructions, whereas the highest suggests that chironomids have limited utility for anything other than reconstructing glacial-interglacial changes.
 
-
-
-Chironomid (non-biting midges) are sensitive to temperature [@Eggermont2011], and because their head-capsules preserve well in lake sediments, their fossil assemblages can be use to reconstruct past temperature with a transfer function trained on the chironomid-temperature relationship in a modern calibration set of chironomid assemblages and associated temperatures. They are a often used to provide a independent temperature reconstruction against which pollen or macrofossil-inferred vegetation changes can be compared [e.g., @Samartin2012].
-
-The performance of transfer functions for reconstructing past temperatures from chironomid assemblages in lake sediments varies enormously. The root-mean-squared-error of prediction (RMSEP) for transfer functions in a compilation by Eggermont and Heiri [-@Eggermont2011], augmented by a few recent studies (Table 1)[^1], ranges between `r min(chiron_clean$'RMSEP (°C)')` and `r round(max(chiron_clean$'RMSEP (°C)'), 2)` °C. The lowest RMSEP suggests that chironomids give very precise reconstructions; the highest suggests that chironomids have limited utility for anything other than reconstruction glacial-interglacial changes. What causes this `r round(max(chiron_clean$'RMSEP (°C)')/min(chiron_clean$'RMSEP (°C)'), 1)`-fold difference in RMSEP? Understanding this might suggest where efforts to improve chironomid-temperature, and other, transfer functions should be focused.
+This paper aims to investigate the factors responsible for variability in transfer function performance using 1) a meta-analysis of the performance of transfer functions in Eggermont and Heiri [-@Eggermont2011] augmented by more recent studies, 2) simulation, and 3) manipulation of calibration sets. Understanding the variability in transfer function performance might suggest where efforts to improve chironomid-temperature, and other, transfer functions should be focused.
 
 # Methods
 
-Transfer function model performance statistics were obtained from Eggermont and Heiri [-@Eggermont2011] and augmented by a literature search for other chironomid-temperature transfer functions. For simplicity, all transfer functions are treated as if they are independent even though some are subsets of others.
+Cross-validated transfer function model performance statistics were obtained from Eggermont and Heiri [-@Eggermont2011] and augmented by a literature search for other chironomid-temperature transfer functions. For simplicity, all transfer functions are treated as if they are independent even though some are subsets of others (transfer function versions differing by just a few sites are omitted).
 
+Where available, I analyse the leave-one-out cross-validated performance as this is the most commonly reported cross-validated scheme.  I calculate the leave-one-out performance for Massaferro and Larocque-Tobler [-@Massaferro2013] who reported only the apparent performance. Three calibration-in-time transfer functions claim to report leave-one-out performance statistics but actually report the apparent statistics [#Telford]. Using either archived or digitised calibration set data, I have calculated the cross-validated performance.
 
 All analyses were done in `r gsub("(.*) \\(.*", "\\1", R.version.string)` [@R2017]. Ordinations were fitted with vegan version 2.4-3 [@vegan2017] with square-root transformed assemblage data. Transfer functions were fitted with rioja version 0.9-15 [@rioja2017] using square-root transformed species data. Some diagnostics were performed using analogue version 0.17-0 [@analogue2016]. The reconstruction significance test was run with randomTF from palaeoSig version 1.1-3 [@palaeoSig2015] with 999 trials for the null distribution.
 
-Code to replicate all the analyses shown above is archived at [https://github.com/richardjtelford/Zabinskie](https://github.com/richardjtelford/Zabinskie).
+Simulations ... 
+
+Code to replicate all the analyses shown above is archived at [https://github.com/richardjtelford/chironomid-calibration-models](https://github.com/richardjtelford/chironomid-calibration-models).
 
 # Results and discussion
 
-
 Part of the variance in performance is explained by the choice of air or water temperatures as a calibration target [@Eggermont2011, Figure 1]. Models calibrated against water temperature have a worse performance even though chironomids spend most of their life in water. This is probably because water temperatures are spot measurements, and thus reflect recent weather, whereas air temperatures are climatological means derived from local weather stations or gridded climatologies [e.g., @Hijmans2005]. 
 
+~~replace this figure with text??
 ```{r calibrationTarget, fig.cap = "Figure 1. Effect of calibration target on RMSEP"}
 readd(plot_calibrationTarget)
 ```
 
-The following analyses concern only the `r nrow(chiron_air)` transfer functions calibrated against air temperatures. Most of these transfer functions are trained on calibration sets of many lakes (calibration-in-space). Two transfer function [@Larocque-Tobler2011; @Luoto2016] are trained on fluctuations in chironomid assemblages in one lake over many years (calibration-in-time). Varve chronologies were used to determine the age of each assemblage. Temperature data for each year are available from nearby weather stations. Both calibration-in-time transfer functions have low RMSEPs.    
+The following analyses concern only the `r nrow(chiron_air)` transfer functions calibrated against air temperatures. Most of these transfer functions are trained on calibration sets of many lakes (calibration-in-space); three  [@Larocque-Tobler2011;  @LarocqueTobler2011b; @Luoto2016] are trained on fluctuations in chironomid assemblages in one lake over many years (calibration-in-time). Varve chronologies were used to determine the age of each assemblage. Temperature data for each year are available from nearby weather stations.   
 
 The range of RMSEPs for the air-temperature calibration-in-space models only slightly smaller than for the full set of models.  The coefficient of determination (r^2^) varies between `r min(chiron_air$r2jack)` and `r round(max(chiron_air$r2jack), 2)` and is uncorrelated with RMSEP (Pearson r = `r round(cor(chiron_air$'RMSEP (°C)', chiron_air$r2jack), 2)`, p `r format_p(cor.test(chiron_air$'RMSEP (°C)', chiron_air$r2jack)$p.value)`).
 
