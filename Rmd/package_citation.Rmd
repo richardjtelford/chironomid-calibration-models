@@ -1,0 +1,52 @@
+---
+title: "Package version and citations"
+author: "Richard J. Telford"
+date: "September 18, 2018"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Almost every manuscript I write has a paragraph that looks something like this:
+
+    All analyses were done in R version 3.4.4 (R Core Team 2017). Ordinations were fitted with vegan version 2.4-6 (Oksanen et al. 2017) with square-root transformed assemblage data. Transfer functions were fitted with rioja version 0.9-15.1 (Juggins 2017) using square-root transformed species data. Some diagnostics were performed using analogue version 0.17-0 (Simpson and Oksanen 2016).
+
+Keeping this paragraph up to date as new versions of R are installed and packages get updated is a pain and apt to go wrong. For example, there are nine citations for ['R core development team (2018)'](https://scholar.google.no/scholar?hl=en&as_sdt=0%2C5&q=%22r+core+development+team+2018%22&btnG=) on Google Scholar even though the citation changed to 'R core team' in 2012.
+
+So this is my solution. I am using a couple of functions, `getRversion()` which returns the version of R used and `packageVersion` which returns the package version used. My the rmarkdown file looks like this
+
+    All analyses were done in R version `r getRversion()` [@R]. Ordinations were fitted with vegan version `r packageVersion("vegan")` [@vegan] with square-root transformed assemblage data. 
+
+Rmarkdown will replace `[@R]` with the entry in my bibtex file with the key `R`, but first I need to add the package citations to my bibliography. I've written a wrapper for `bibtex::write.bib` to do this.
+
+```{r, echo = TRUE, eval = FALSE}
+package_citations <- function(packages, old_bib, new_bib){
+  
+  #copy original bib file
+  fs::file_copy(old_bib, new_bib)
+  
+  #R citation
+  Rcite <- citation()
+  Rcite$key = "R"
+  bibtex::write.bib(Rcite, new_bib, append = TRUE)
+  
+  #package citation
+  bibtex::write.bib(packages, new_bib, append = TRUE)
+}  
+```  
+
+This function makes a copy of an existing bibtex file and adds citations for R (with the key set to R) and packages. To use it, I run
+
+```{r, eval = FALSE}
+package_citations(
+    packages = c("vegan", "rioja", "analogue"), 
+    old_bib = file_in("Rmd/extra/chironomid.bib"), 
+    new_bib = file_out("Rmd/extra/chironomid2.bib")
+```
+
+The new bibtex file is now ready for use. 
+
+One small complication is that some packages have multiple citations. These are identified by an integer after the package name in the bibtex key (e.g. analogue1, analogue2) and you need to inspect the bibtex file to work out which you want.
+

@@ -17,7 +17,7 @@ output:
       number_sections: true
 documentclass: article
 classoption: a4paper
-bibliography: extra/chironomid.bib
+bibliography: extra/chironomid2.bib
 csl: extra/journal-of-paleolimnology.csl
 toc: false
 ---
@@ -51,7 +51,7 @@ Cross-validated performance statistics for chironomid transfer functions calibra
 
 Where available, I analysed leave-one-out cross-validated performance as this is the most commonly reported cross-validated scheme. I calculate the leave-one-out performance for Massaferro and Larocque-Tobler [-@Massaferro2013] who reported the apparent performance. Three calibration-in-time transfer functions claim to report leave-one-out performance statistics but actually report the apparent statistics [#Telford]. Using either archived or digitised calibration set data, I have calculated the cross-validated performance.
 
-All analyses were done in R version `r getRversion()` [@R2017]. Ordinations were fitted with vegan version `r packageVersion("vegan")` [@vegan2017] with square-root transformed assemblage data. Transfer functions were fitted with rioja version `r packageVersion("rioja")` [@rioja2017] using square-root transformed species data. Some diagnostics were performed using analogue version `r packageVersion("analogue")` [@analogue2016]. The reconstruction significance test was run with randomTF from palaeoSig version `r packageVersion("palaeoSig")` [@palaeoSig2015] with 999 trials for the null distribution.
+All analyses were done in R version `r getRversion()` [@R]. Ordinations were fitted with vegan version `r packageVersion("vegan")` [@vegan] with square-root transformed assemblage data. Transfer functions were fitted with rioja version `r packageVersion("rioja")` [@rioja] using square-root transformed species data. Some diagnostics were performed using analogue version `r packageVersion("analogue")` [@analogue1]. The reconstruction significance test was run with randomTF from palaeoSig version `r packageVersion("palaeoSig")` [@palaeoSig] with 999 trials for the null distribution.
 
 Simulations ... 
 

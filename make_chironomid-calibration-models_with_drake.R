@@ -7,6 +7,7 @@ library("broom")
 
 #import scripts
 source("R/performance_plots.R")
+source("R/package_citations.R")
 
 
 #construct drake plan
@@ -25,6 +26,12 @@ analyses <- drake_plan(
   
   #get bibliography
   biblio = download.file("https://raw.githubusercontent.com/richardjtelford/Zabinskie/master/chironomid.bib", destfile = file_out("Rmd/extra/chironomid.bib")),
+  
+  #add extra packages to bibliography
+  biblio2 = package_citations(
+    packages = c("vegan", "rioja", "analogue", "palaeoSig"), 
+    old_bib = file_in("Rmd/extra/chironomid.bib"), 
+    new_bib = file_out("Rmd/extra/chironomid2.bib")),
   
   #knit manuscript
   manuscript = rmarkdown::render(input = knitr_in("Rmd/chironomidCalibration_MS.Rmd"), output_dir = "./output", output_file = file_out("output/chironomidCalibration_MS.pdf")),
