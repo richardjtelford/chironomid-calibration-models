@@ -61,7 +61,7 @@ Code to replicate all the analyses shown above is archived at [https://github.co
 
 I located `r nrow(chiron_air)` chironomid transfer functions calibrated against air temperatures (Table \@ref(performanceTable)). Most of these transfer functions are trained on calibration sets of many lakes (calibration-in-space); three [@Larocque-Tobler2011; @LarocqueTobler2011b; @Luoto2016] are based on fluctuations in varve-dated chironomid assemblages in one lake over many years (calibration-in-time) calibrated against temperature series from nearby weather stations.
 
-The RMSEPs range between `r min(chiron_air$'RMSEP (°C)')`°C and `r round(max(chiron_air$'RMSEP (°C)'), 2)`°C. The coefficient of determination (r^2^) varies between `r min(chiron_air$r2jack)` and `r round(max(chiron_air$r2jack), 2)` and is uncorrelated with RMSEP (Pearson r = `r round(cor(chiron_air$'RMSEP (°C)', chiron_air$r2jack), 2)`, p `r format_p(cor.test(chiron_air$'RMSEP (°C)', chiron_air$r2jack)$p.value)`).
+The RMSEPs range between `r min(chiron_air$'RMSEP (°C)')`°C and `r round(max(chiron_air$'RMSEP (°C)'), 2)`°C. The coefficient of determination (r^2^) varies between `r min(chiron_air$r2jack)` and `r round(max(chiron_air$r2jack), 2)` and is uncorrelated with RMSEP (Pearson r = `r round(cor(chiron_air$'RMSEP (°C)', chiron_air$r2jack), 2)`, p `r format_p(cor.test(chiron_air$'RMSEP (°C)', chiron_air$r2jack)$p.value) %>% insist(. > 0.1)`).
 
 I have several hypotheses that might explain the difference in performance between models:
 
@@ -90,10 +90,10 @@ mod2 <- update(mod, . ~ . + I(`Range of gradient (°C)`^2))
 
 ```
 
-The temperatures in the calibration sets range from `r min(chiron_air$'Range of gradient (°C)')` to `r max(chiron_air$'Range of gradient (°C)')` °C. RMSEP has a strong (R^2^ = `r round(gmod$r.squared, 2)` ; p `r format_p(gmod$p.value)`) positive (slope = `r signif(coef(mod)[2], 2)` °C/°C) relationship with temperature range (Figure 2). The relation between temperature range and r^2^ is weaker (R^2^ = `r round(grmod$r.squared, 2)`; p `r format_p(grmod$p.value)`), and also positive (slope = `r signif(coef(rmod)[2], 2)` °C^-1^).
+The temperature gradient lengths in the calibration sets range from `r min(chiron_air$'Range of gradient (°C)')` to `r max(chiron_air$'Range of gradient (°C)')` °C. RMSEP has a strong (R^2^ = `r round(gmod$r.squared, 2) %>% insist(. > 0.5)` ; p `r format_p(gmod$p.value) %>% insist(. < 0.05)`) positive (slope = `r signif(coef(mod)[2], 2) %>% insist(. > 0)` °C/°C) relationship with temperature range (Figure \@ref(fig:gradientfig)). The relation between temperature range and r^2^ is weaker (R^2^ = `r round(grmod$r.squared, 2) %>% insist(. < gmod$r.squared)`; p `r format_p(grmod$p.value)`), and also positive (slope = `r signif(coef(rmod)[2], 2) %>% insist(. > 0)` °C^-1^).
 
-```{r gradientfig, fig.cap="Figure 2. RMSEP and r^2^ against calibration set temperature range"}
-readd(plot_performance_vs_range) %>% print()
+```{r gradientfig, fig.cap="RMSEP and r^2^ against calibration set temperature range"}
+readd(plot_performance_vs_range) %>% plot()
 ```
 
 The r^2^ increases with temperature range because, even though RMSEP increases, RMSEP as a proportion of temperature range decreases. 
@@ -109,7 +109,7 @@ mod_a <- lm(I(No_lakes/`Range of gradient (°C)`) ~ `Range of gradient (°C)`, d
 gmod_a <- glance(mod_a)
 ```
 
-Omitting the anomalously large composite calibration set [@Fortin2015], there is a significant (p `r format_p(gmod_a$p.value)`) negative trend (slope = `r signif(coef(mod_a)[2], 2)` lakes/°C/°C).
+Omitting the anomalously large composite calibration set [@Fortin2015], there is a significant (p `r format_p(gmod_a$p.value) %>% insist(. < 0.05)`) negative trend (slope = `r signif(coef(mod_a)[2], 2) %>% insist(. < 0)` lakes/°C/°C).
 
 ```{r lakedensity}
 mod_den <- lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`), data = chiron_air, subset = No_lakes < 400) 
@@ -122,7 +122,7 @@ mod_den_r <- lm(`RMSEP (°C)` ~ I(No_lakes/`Range of gradient (°C)`) + `Range o
 gmod_den_r <- glance(mod_den_r)
 ```
 
-Lake density is a less good predictor (R^2^ = `r round(gmod_den$r.squared, 2)`) of RMSEP than temperature range. So while it might be an important contributor to the effect of temperature range on performance, it does not explain the whole effect. A model including both lake density and temperature range is not significantly better than a model with just temperature range (p `r format_p(anova(mod_den_r, mod_no450)$Pr[2])`).
+Lake density is a less good predictor (R^2^ = `r round(gmod_den$r.squared, 2) %>% insist(. < gmod$r.squared)`) of RMSEP than temperature range. So while it might be an important contributor to the effect of temperature range on performance, it does not explain the whole effect. A model including both lake density and temperature range is not significantly better than a model with just temperature range (p `r format_p(anova(mod_den_r, mod_no450)$Pr[2])`).
 
 There is a hint in figure 2 that the relationship between RMSEP and temperature range is not linear, but that with increasingly long gradients the RMSEP starts to plateau. Adding a quadratic term does not significantly improve a linear model between RMSEP and temperature (p `r format_p(anova(mod, mod2)$Pr[2])`), but the AIC decreases (`r round(AIC(mod2), 1)` vs. `r round(AIC(mod), 1)`). If the RMSEP increases with increasing temperature range because of the decreasing constraint on the range of predictions, it should be expected that with sufficiently large range all constrains are removed and no further increase in RMSEP is observed.
 

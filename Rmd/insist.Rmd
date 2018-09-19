@@ -1,0 +1,46 @@
+---
+title: "Insist() on the text being correct"
+author: "Richard J. Telford"
+date: "September 19, 2018"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+The manuscript I submitted a long time ago contains multiple sentences where I describe the result with both text and numbers. For example:
+
+
+    With a three-year moving average, the correlation is weak (r = 0.21) and not statistically significant (p = 0.28).
+   
+   
+This is produced from the Rmarkdown 
+
+    With a three-year moving average, the correlation is weak (r = `\r smo_cor$estimate\`) and not statistically significant (p = `\r smo_cor$p.value\`).
+   
+If I update the code that generates `smo_cor`, or the data changes, the numbers will automatically update potentially creating a conflict with the text which need updating manually. I need a solution to identify when this has happened.
+
+I want a function that I can give an object and a logical test that will either return the object if the test is true, or throws an error if it is not. I've used the `assertr` package before, which does what I want, but only for data.frames. I've looked in `assertthat` but cannot find what I want, so I've written my own short function.
+
+```{r}
+insist <- function(., test){
+  if(!eval(substitute(test), envir = parent.frame())){
+    stop(deparse(substitute(test)), " is not TRUE: \n. =  ", .)
+  } 
+  return(.)
+}
+```
+
+Quick test
+
+```{r, error=TRUE}
+pi %>% insist(. > 4)#FALSE - throws error
+pi %>% insist(. < 3.5)# TRUE - returns pi
+```
+My Rmarkdown now looks like
+
+    With a three-year moving average, the correlation is weak (r = `\r smo_cor$estimate %>% insist(. < 0.3)\`) and not statistically significant (p = `\r smo_cor$p.value %>% insist(. > 0.05)\`).
+
+Now if either of the statements is false, I should get an informative error.

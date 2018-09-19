@@ -8,6 +8,7 @@ library("broom")
 #import scripts
 source("R/performance_plots.R")
 source("R/package_citations.R")
+source("R/insist.R")
 
 
 #construct drake plan
